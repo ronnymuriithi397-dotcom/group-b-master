@@ -1,5 +1,5 @@
 from django.contrib import messages
-from django.contrib.auth import login
+from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect, get_object_or_404
@@ -62,6 +62,7 @@ def signup(request):
         email = request.POST.get('email')
         password = request.POST.get('password')
 
+
         if User.objects.filter(username=username).exists():
             messages.error(request, 'User already exists!')
             return redirect('signup')
@@ -72,3 +73,22 @@ def signup(request):
         login(request, user)
         return redirect('dashboard')
     return render(request, 'sign_up.html')
+
+def login_view(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            return redirect('dashboard')
+        else:
+            messages.error(request, 'Invalid username and/or password.')
+            return redirect('login')
+    return render(request, 'login.html')
+
+def logout_view(request):
+    logout(request)
+    return redirect('login')
